@@ -1,7 +1,12 @@
-require('./bootstrap');
+import Vue from 'vue'
 
-window.Vue = require('vue');
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/js/bootstrap.min';
 
-const app = new Vue({
+import './bootstrap';
+import App from './components/App'
+
+new Vue({
     el: '#app',
+    components: { App },
 });
