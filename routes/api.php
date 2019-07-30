@@ -16,6 +16,8 @@ use Illuminate\Http\Request;
 Route::namespace('Api')->group(function () {
     Route::get('/markers', 'MarkerController@index');
     Route::post('/markers/add', 'MarkerController@add');
+
+    Route::get('/categories', 'CategoryController@index');
 });
 
 Route::get('/{any}', 'SpaController@index')->where('any', '.*');
