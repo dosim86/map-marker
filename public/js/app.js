@@ -1724,6 +1724,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var leaflet_dist_leaflet_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! leaflet/dist/leaflet.css */ "./node_modules/leaflet/dist/leaflet.css");
 /* harmony import */ var leaflet_dist_leaflet_css__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(leaflet_dist_leaflet_css__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _services_marker_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/marker-service */ "./resources/js/services/marker-service.js");
+/* harmony import */ var _services_category_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/category-service */ "./resources/js/services/category-service.js");
 //
 //
 //
@@ -1743,20 +1744,58 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+
 
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
+      newMarker: {
+        category_id: null,
+        coords: null,
+        comment: null
+      },
       map: null,
       tileLayer: null,
-      markerList: null
+      markerList: null,
+      categoryList: null
     };
   },
   mounted: function mounted() {
     var _this = this;
 
+    _services_category_service__WEBPACK_IMPORTED_MODULE_3__["default"].getAllCategories().then(function (resp) {
+      _this.setCategoryList(resp.data.data);
+    });
     _services_marker_service__WEBPACK_IMPORTED_MODULE_2__["default"].getAllMarkers().then(function (resp) {
       _this.setMarkerList(resp.data.data);
 
@@ -1769,19 +1808,43 @@ __webpack_require__.r(__webpack_exports__);
     setMarkerList: function setMarkerList(data) {
       this.markerList = data;
     },
+    setCategoryList: function setCategoryList(data) {
+      this.categoryList = data;
+    },
     initMap: function initMap() {
       this.map = leaflet__WEBPACK_IMPORTED_MODULE_0___default.a.map('map').setView([45.63, 63.31], 13);
       this.tileLayer = leaflet__WEBPACK_IMPORTED_MODULE_0___default.a.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png').addTo(this.map);
+      this.map.on('click', this.openDialog);
     },
     initLayers: function initLayers() {
       this.markerList.forEach(this.renderMarker);
+    },
+    openDialog: function openDialog(e) {
+      this.newMarker.category_id = null;
+      this.newMarker.comment = null;
+      this.newMarker.coords = e.latlng;
+      $('#markerModal').modal('show');
+    },
+    appendMarker: function appendMarker() {
+      var _this2 = this;
+
+      $('#markerModal').modal('hide');
+      _services_marker_service__WEBPACK_IMPORTED_MODULE_2__["default"].addMarker(this.newMarker).then(function (resp) {
+        _this2.renderMarker(resp.data.data);
+      });
     },
     renderMarker: function renderMarker(marker) {
       var icon = new leaflet__WEBPACK_IMPORTED_MODULE_0___default.a.Icon.Default();
       icon.options.shadowSize = [0, 0];
       leaflet__WEBPACK_IMPORTED_MODULE_0___default.a.marker(marker.coords, {
         icon: icon
-      }).addTo(this.map).bindPopup('Добавлено: ' + marker.created_at + (marker.comment ? '<br>Заметка: ' + marker.comment : ''));
+      }).addTo(this.map).bindPopup('Добавлено: ' + marker.created_at + '<br>Категория: ' + this.getCategoryName(marker.category_id) + (marker.comment ? '<br>Заметка: ' + marker.comment : ''));
+    },
+    getCategoryName: function getCategoryName(id) {
+      var matches = this.categoryList.filter(function (item) {
+        return +item.id === +id;
+      });
+      return matches.length ? matches[0].name : 'неизвестно';
     }
   }
 });
@@ -51911,48 +51974,206 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _vm._m(0)
+  return _c("div", { staticClass: "container" }, [
+    _vm._m(0),
+    _vm._v(" "),
+    _vm._m(1),
+    _vm._v(" "),
+    _c(
+      "div",
+      {
+        staticClass: "modal fade",
+        attrs: {
+          id: "markerModal",
+          tabindex: "-1",
+          role: "dialog",
+          "aria-labelledby": "exampleModalLabel",
+          "aria-hidden": "true"
+        }
+      },
+      [
+        _c(
+          "div",
+          { staticClass: "modal-dialog", attrs: { role: "document" } },
+          [
+            _c("div", { staticClass: "modal-content" }, [
+              _c(
+                "form",
+                {
+                  on: {
+                    submit: function($event) {
+                      $event.preventDefault()
+                      return _vm.appendMarker($event)
+                    }
+                  }
+                },
+                [
+                  _c("div", { staticClass: "modal-body" }, [
+                    _c("h5", [_vm._v("Новый маркер")]),
+                    _vm._v(" "),
+                    _c("hr"),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group" }, [
+                      _c("label", [_vm._v("Категория")]),
+                      _vm._v(" "),
+                      _c(
+                        "select",
+                        {
+                          directives: [
+                            {
+                              name: "model",
+                              rawName: "v-model",
+                              value: _vm.newMarker.category_id,
+                              expression: "newMarker.category_id"
+                            }
+                          ],
+                          staticClass: "form-control",
+                          attrs: { required: "" },
+                          on: {
+                            change: function($event) {
+                              var $$selectedVal = Array.prototype.filter
+                                .call($event.target.options, function(o) {
+                                  return o.selected
+                                })
+                                .map(function(o) {
+                                  var val = "_value" in o ? o._value : o.value
+                                  return val
+                                })
+                              _vm.$set(
+                                _vm.newMarker,
+                                "category_id",
+                                $event.target.multiple
+                                  ? $$selectedVal
+                                  : $$selectedVal[0]
+                              )
+                            }
+                          }
+                        },
+                        [
+                          _c(
+                            "option",
+                            {
+                              attrs: { disabled: "" },
+                              domProps: { value: null }
+                            },
+                            [_vm._v("(выберите категорию)")]
+                          ),
+                          _vm._v(" "),
+                          _vm._l(_vm.categoryList, function(category) {
+                            return _c(
+                              "option",
+                              { domProps: { value: category.id } },
+                              [_vm._v(_vm._s(category.name))]
+                            )
+                          })
+                        ],
+                        2
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", { staticClass: "form-group" }, [
+                      _c("label", { attrs: { for: "coord_comment" } }, [
+                        _vm._v("Заметка")
+                      ]),
+                      _vm._v(" "),
+                      _c("textarea", {
+                        directives: [
+                          {
+                            name: "model",
+                            rawName: "v-model",
+                            value: _vm.newMarker.comment,
+                            expression: "newMarker.comment"
+                          }
+                        ],
+                        staticClass: "form-control",
+                        attrs: { id: "coord_comment" },
+                        domProps: { value: _vm.newMarker.comment },
+                        on: {
+                          input: function($event) {
+                            if ($event.target.composing) {
+                              return
+                            }
+                            _vm.$set(
+                              _vm.newMarker,
+                              "comment",
+                              $event.target.value
+                            )
+                          }
+                        }
+                      })
+                    ])
+                  ]),
+                  _vm._v(" "),
+                  _vm._m(2)
+                ]
+              )
+            ])
+          ]
+        )
+      ]
+    )
+  ])
 }
 var staticRenderFns = [
   function() {
     var _vm = this
     var _h = _vm.$createElement
     var _c = _vm._self._c || _h
-    return _c("div", { staticClass: "container" }, [
-      _c("h1", { staticClass: "text-center my-5" }, [
-        _vm._v("Демонстрационная карта "),
-        _c("span", { staticClass: "text-info" }, [_vm._v("Vue + Laravel")])
+    return _c("h1", { staticClass: "text-center my-5" }, [
+      _vm._v("Демонстрационная карта "),
+      _c("span", { staticClass: "text-info" }, [_vm._v("Vue + Laravel")])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "row" }, [
+      _c("div", { staticClass: "col-9" }, [
+        _c("div", { staticClass: "map card", attrs: { id: "map" } })
       ]),
       _vm._v(" "),
-      _c("div", { staticClass: "row" }, [
-        _c("div", { staticClass: "col-9" }, [
-          _c("div", { staticClass: "map card", attrs: { id: "map" } })
+      _c("div", { staticClass: "col-3" }, [
+        _c("h5", { staticClass: "font-weight-bold pb-3" }, [
+          _vm._v("Инструкция")
         ]),
         _vm._v(" "),
-        _c("div", { staticClass: "col-3" }, [
-          _c("h5", { staticClass: "font-weight-bold pb-3" }, [
-            _vm._v("Инструкция")
+        _c("p", { staticClass: "text-info" }, [
+          _c("span", { staticClass: "text-primary" }, [
+            _vm._v("ДОБАВИТЬ МАРКЕР")
           ]),
+          _vm._v(
+            " - нажмите левую кнопку мышки на нужной точке в области карты"
+          ),
+          _c("br"),
+          _c("br"),
           _vm._v(" "),
-          _c("p", { staticClass: "text-info" }, [
-            _c("span", { staticClass: "text-primary" }, [
-              _vm._v("ДОБАВИТЬ МАРКЕР")
-            ]),
-            _vm._v(
-              " - нажмите левую кнопку мышки на нужной точке в области карты"
-            ),
-            _c("br"),
-            _c("br"),
-            _vm._v(" "),
-            _c("span", { staticClass: "text-primary" }, [
-              _vm._v("ПЕРЕМЕЩЕНИЕ ПО КАРТЕ")
-            ]),
-            _vm._v(
-              " - нажмите левую кнопку мышки в области карты и не отпуская перемещайте ее\n            "
-            )
-          ])
+          _c("span", { staticClass: "text-primary" }, [
+            _vm._v("ПЕРЕМЕЩЕНИЕ ПО КАРТЕ")
+          ]),
+          _vm._v(
+            " - нажмите левую кнопку мышки в области карты и не отпуская перемещайте ее\n            "
+          )
         ])
       ])
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", { staticClass: "modal-footer" }, [
+      _c(
+        "button",
+        { staticClass: "btn btn-default", attrs: { "data-dismiss": "modal" } },
+        [_vm._v("Отмена")]
+      ),
+      _vm._v(" "),
+      _c(
+        "button",
+        { staticClass: "btn btn-success", attrs: { type: "submit" } },
+        [_vm._v("Добавить")]
+      )
     ])
   }
 ]
@@ -64272,6 +64493,26 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_App_vue_vue_type_template_id_332fccf4___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
+
+/***/ }),
+
+/***/ "./resources/js/services/category-service.js":
+/*!***************************************************!*\
+  !*** ./resources/js/services/category-service.js ***!
+  \***************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+var client = axios.create({
+  baseURL: '/api/categories'
+});
+/* harmony default export */ __webpack_exports__["default"] = ({
+  getAllCategories: function getAllCategories() {
+    return client.get();
+  }
+});
 
 /***/ }),
 
