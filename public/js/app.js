@@ -1783,38 +1783,35 @@ __webpack_require__.r(__webpack_exports__);
         comment: null
       },
       map: null,
-      tileLayer: null,
-      markerList: null
+      tileLayer: null
     };
   },
   computed: {
     categories: function categories() {
       return this.$store.getters.categories;
+    },
+    markers: function markers() {
+      return this.$store.getters.markers;
     }
   },
   mounted: function mounted() {
     var _this = this;
 
     this.$store.dispatch('fetchCategories');
-    _services_marker_service__WEBPACK_IMPORTED_MODULE_2__["default"].getAllMarkers().then(function (resp) {
-      _this.setMarkerList(resp.data.data);
-
+    this.$store.dispatch('fetchMarkers').then(function () {
       _this.initMap();
 
       _this.initLayers();
     });
   },
   methods: {
-    setMarkerList: function setMarkerList(data) {
-      this.markerList = data;
-    },
     initMap: function initMap() {
       this.map = leaflet__WEBPACK_IMPORTED_MODULE_0___default.a.map('map').setView([45.63, 63.31], 13);
       this.tileLayer = leaflet__WEBPACK_IMPORTED_MODULE_0___default.a.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png').addTo(this.map);
       this.map.on('click', this.openDialog);
     },
     initLayers: function initLayers() {
-      this.markerList.forEach(this.renderMarker);
+      this.markers.forEach(this.renderMarker);
     },
     openDialog: function openDialog(e) {
       this.newMarker.category_id = null;
@@ -1835,13 +1832,10 @@ __webpack_require__.r(__webpack_exports__);
       icon.options.shadowSize = [0, 0];
       leaflet__WEBPACK_IMPORTED_MODULE_0___default.a.marker(marker.coords, {
         icon: icon
-      }).addTo(this.map).bindPopup('Добавлено: ' + marker.created_at + '<br>Категория: ' + this.getCategoryName(marker.category_id) + (marker.comment ? '<br>Заметка: ' + marker.comment : ''));
+      }).addTo(this.map).bindPopup(this.markerTemplate(marker));
     },
-    getCategoryName: function getCategoryName(id) {
-      var match = this.categories.find(function (item) {
-        return +item.id === +id;
-      });
-      return match ? match.name : 'неизвестно';
+    markerTemplate: function markerTemplate(marker) {
+      return 'Добавлено: ' + marker.created_at + '<br>Категория: ' + this.$store.getters.getCategoryName(marker.category_id) + (marker.comment ? '<br>Заметка: ' + marker.comment : '');
     }
   }
 });
@@ -65583,26 +65577,45 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var vue__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(vue__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var vuex__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! vuex */ "./node_modules/vuex/dist/vuex.esm.js");
 /* harmony import */ var _services_category_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/category-service */ "./resources/js/services/category-service.js");
+/* harmony import */ var _services_marker_service__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../services/marker-service */ "./resources/js/services/marker-service.js");
+
 
 
 
 vue__WEBPACK_IMPORTED_MODULE_0___default.a.use(vuex__WEBPACK_IMPORTED_MODULE_1__["default"]);
 var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
   state: {
-    categories: null
+    categories: null,
+    markers: null
   },
-  mutations: {},
   actions: {
     fetchCategories: function fetchCategories(_ref) {
       var state = _ref.state;
-      _services_category_service__WEBPACK_IMPORTED_MODULE_2__["default"].getAllCategories().then(function (resp) {
+      return _services_category_service__WEBPACK_IMPORTED_MODULE_2__["default"].getAllCategories().then(function (resp) {
         state.categories = resp.data.data;
+      });
+    },
+    fetchMarkers: function fetchMarkers(_ref2) {
+      var state = _ref2.state;
+      return _services_marker_service__WEBPACK_IMPORTED_MODULE_3__["default"].getAllMarkers().then(function (resp) {
+        state.markers = resp.data.data;
       });
     }
   },
   getters: {
     categories: function categories(state) {
       return state.categories;
+    },
+    markers: function markers(state) {
+      return state.markers;
+    },
+    getCategoryName: function getCategoryName(state) {
+      return function (id) {
+        var match = state.categories.find(function (item) {
+          return +item.id === +id;
+        });
+        return match ? match.name : 'неизвестно';
+      };
     }
   }
 });

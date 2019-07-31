@@ -61,28 +61,24 @@
                 },
                 map: null,
                 tileLayer: null,
-                markerList: null,
             }
         },
         computed: {
             categories() {
                 return this.$store.getters.categories;
+            },
+            markers() {
+                return this.$store.getters.markers;
             }
         },
         mounted() {
             this.$store.dispatch('fetchCategories');
-
-            markerService.getAllMarkers()
-                .then(resp => {
-                    this.setMarkerList(resp.data.data);
-                    this.initMap();
-                    this.initLayers();
-                });
+            this.$store.dispatch('fetchMarkers').then(() => {
+                this.initMap();
+                this.initLayers();
+            });
         },
         methods: {
-            setMarkerList(data) {
-                this.markerList = data;
-            },
             initMap() {
                 this.map = L.map('map').setView(
                     [45.63, 63.31], 13
@@ -95,7 +91,7 @@
                 this.map.on('click', this.openDialog);
             },
             initLayers() {
-                this.markerList.forEach(this.renderMarker);
+                this.markers.forEach(this.renderMarker);
             },
             openDialog(e) {
                 this.newMarker.category_id = null;
@@ -119,15 +115,12 @@
 
                 L.marker(marker.coords, { icon })
                     .addTo(this.map)
-                    .bindPopup(
-                        'Добавлено: ' + marker.created_at
-                        + '<br>Категория: ' + this.getCategoryName(marker.category_id)
-                        + (marker.comment ? ('<br>Заметка: ' + marker.comment) : '')
-                    );
+                    .bindPopup(this.markerTemplate(marker));
             },
-            getCategoryName(id) {
-                const match = this.categories.find(item => +item.id === +id);
-                return match ? match.name : 'неизвестно'
+            markerTemplate(marker) {
+                return 'Добавлено: ' + marker.created_at
+                    + '<br>Категория: ' + this.$store.getters.getCategoryName(marker.category_id)
+                    + (marker.comment ? ('<br>Заметка: ' + marker.comment) : '')
             },
         },
     }
