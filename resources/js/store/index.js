@@ -25,7 +25,17 @@ const store = new Vuex.Store({
                 .then(resp => {
                     state.markers = resp.data.data;
                 });
-        }
+        },
+        addMarker ({ state }, newMarker) {
+            return markerService
+                .addMarker(newMarker)
+                .then(resp => {
+                    const newMarker = resp.data.data;
+                    state.markers.push(newMarker);
+
+                    return newMarker;
+                });
+        },
     },
     getters: {
         categories: state => {

@@ -1723,7 +1723,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var leaflet__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(leaflet__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var leaflet_dist_leaflet_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! leaflet/dist/leaflet.css */ "./node_modules/leaflet/dist/leaflet.css");
 /* harmony import */ var leaflet_dist_leaflet_css__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(leaflet_dist_leaflet_css__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _services_marker_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../services/marker-service */ "./resources/js/services/marker-service.js");
 //
 //
 //
@@ -1771,7 +1770,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-
 
 
 /* harmony default export */ __webpack_exports__["default"] = ({
@@ -1823,8 +1821,8 @@ __webpack_require__.r(__webpack_exports__);
       var _this2 = this;
 
       $('#markerModal').modal('hide');
-      _services_marker_service__WEBPACK_IMPORTED_MODULE_2__["default"].addMarker(this.newMarker).then(function (resp) {
-        _this2.renderMarker(resp.data.data);
+      this.$store.dispatch('addMarker', this.newMarker).then(function (newMarker) {
+        _this2.renderMarker(newMarker);
       });
     },
     renderMarker: function renderMarker(marker) {
@@ -65599,6 +65597,14 @@ var store = new vuex__WEBPACK_IMPORTED_MODULE_1__["default"].Store({
       var state = _ref2.state;
       return _services_marker_service__WEBPACK_IMPORTED_MODULE_3__["default"].getAllMarkers().then(function (resp) {
         state.markers = resp.data.data;
+      });
+    },
+    addMarker: function addMarker(_ref3, newMarker) {
+      var state = _ref3.state;
+      return _services_marker_service__WEBPACK_IMPORTED_MODULE_3__["default"].addMarker(newMarker).then(function (resp) {
+        var newMarker = resp.data.data;
+        state.markers.push(newMarker);
+        return newMarker;
       });
     }
   },

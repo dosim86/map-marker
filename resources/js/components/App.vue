@@ -49,8 +49,6 @@
     import L from 'leaflet'
     import 'leaflet/dist/leaflet.css'
 
-    import markerService from '../services/marker-service';
-
     export default {
         data() {
             return {
@@ -103,10 +101,9 @@
             appendMarker() {
                 $('#markerModal').modal('hide');
 
-                markerService
-                    .addMarker(this.newMarker)
-                    .then(resp => {
-                        this.renderMarker(resp.data.data);
+                this.$store.dispatch('addMarker', this.newMarker)
+                    .then(newMarker => {
+                        this.renderMarker(newMarker);
                     });
             },
             renderMarker(marker) {
