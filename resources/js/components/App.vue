@@ -26,7 +26,7 @@
                                 <label>Категория</label>
                                 <select class="form-control" v-model="newMarker.category_id" required>
                                     <option :value="null" disabled>(выберите категорию)</option>
-                                    <option v-for="category in categoryList" :value="category.id">{{category.name}}</option>
+                                    <option v-for="category in categories" :value="category.id">{{category.name}}</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -50,7 +50,6 @@
     import 'leaflet/dist/leaflet.css'
 
     import markerService from '../services/marker-service';
-    import categoryService from '../services/category-service';
 
     export default {
         data() {
@@ -63,14 +62,15 @@
                 map: null,
                 tileLayer: null,
                 markerList: null,
-                categoryList: null,
+            }
+        },
+        computed: {
+            categories() {
+                return this.$store.getters.categories;
             }
         },
         mounted() {
-            categoryService.getAllCategories()
-                .then(resp => {
-                    this.setCategoryList(resp.data.data);
-                });
+            this.$store.dispatch('fetchCategories');
 
             markerService.getAllMarkers()
                 .then(resp => {
@@ -82,9 +82,6 @@
         methods: {
             setMarkerList(data) {
                 this.markerList = data;
-            },
-            setCategoryList(data) {
-                this.categoryList = data;
             },
             initMap() {
                 this.map = L.map('map').setView(
@@ -129,11 +126,8 @@
                     );
             },
             getCategoryName(id) {
-                const matches = this.categoryList.filter(item => {
-                    return +item.id === +id;
-                });
-
-                return matches.length ? matches[0].name : 'неизвестно'
+                const match = this.categories.find(item => +item.id === +id);
+                return match ? match.name : 'неизвестно'
             },
         },
     }
