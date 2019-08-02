@@ -15,39 +15,18 @@
             </div>
         </div>
 
-        <div class="modal fade" id="markerModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <form @submit.prevent="appendMarker">
-                        <div class="modal-body">
-                            <h5>Новый маркер</h5>
-                            <hr>
-                            <div class="form-group">
-                                <label>Категория</label>
-                                <select class="form-control" v-model="newMarker.category_id" required>
-                                    <option :value="null" disabled>(выберите категорию)</option>
-                                    <option v-for="category in categories" :value="category.id">{{category.name}}</option>
-                                </select>
-                            </div>
-                            <div class="form-group">
-                                <label for="coord_comment">Заметка</label>
-                                <textarea class="form-control" id="coord_comment" v-model="newMarker.comment"></textarea>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn btn-default" data-dismiss="modal">Отмена</button>
-                            <button type="submit" class="btn btn-success">Добавить</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+        <modal v-bind:categories="categories"
+               v-bind:marker="newMarker"
+               @submit="appendMarker">
+        </modal>
     </div>
 </template>
 
 <script>
     import L from 'leaflet'
     import 'leaflet/dist/leaflet.css'
+
+    import modal from './Modal';
 
     export default {
         data() {
@@ -60,6 +39,9 @@
                 map: null,
                 tileLayer: null,
             }
+        },
+        components: {
+            modal
         },
         computed: {
             categories() {
@@ -96,12 +78,12 @@
                 this.newMarker.comment = null;
                 this.newMarker.coords = e.latlng;
 
-                $('#markerModal').modal('show');
+                modal.methods.open();
             },
-            appendMarker() {
-                $('#markerModal').modal('hide');
+            appendMarker(marker) {
+                modal.methods.close();
 
-                this.$store.dispatch('addMarker', this.newMarker)
+                this.$store.dispatch('addMarker', this.newMarker = marker)
                     .then(newMarker => {
                         this.renderMarker(newMarker);
                     });
