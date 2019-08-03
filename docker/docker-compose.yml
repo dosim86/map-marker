@@ -1,0 +1,33 @@
+version: '3.3'
+services:
+    nginx:
+        image: nginx:1.14-alpine
+        restart: always
+        ports:
+            - 81:80
+        depends_on:
+            - php
+            - mysql
+        volumes:
+            - ..:/www
+            - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+        working_dir: /www
+
+    php:
+        build:
+            context: ./php
+        restart: always
+        volumes:
+            - ..:/www
+        working_dir: /www
+
+    mysql:
+        image: mysql:5.7
+        restart: always
+        ports:
+            - 3307:3306
+        environment:
+            MYSQL_ROOT_PASSWORD: '1'
+            MYSQL_DATABASE: 'map'
+            MYSQL_USER: 'root'
+            MYSQL_PASSWORD: '1'
